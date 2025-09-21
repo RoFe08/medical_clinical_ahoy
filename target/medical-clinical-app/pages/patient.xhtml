@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Gestão de Pacientes</title>
+</h:head>
+
+<h:body>
+    <h1>Gestão de Pacientes</h1>
+
+    <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
+
+    <h:form id="form">
+
+        <p:panel header="Criar Paciente" style="max-width:600px">
+            <div class="grid">
+                <div class="col-6">
+                    <p:outputLabel for="nome" value="Nome"/>
+                    <p:inputText id="nome" value="#{patientBean.nome}" required="true" />
+                </div>
+                <div class="col-6">
+                    <p:outputLabel for="cpf" value="CPF (11 dígitos)"/>
+                    <p:inputText id="cpf" value="#{patientBean.cpf}" maxlength="11" required="true"/>
+                </div>
+                <div class="col-6">
+                    <p:outputLabel for="dataNasc" value="Data Nascimento"/>
+                    <p:datePicker id="dataNasc" value="#{patientBean.dataNascimento}" pattern="yyyy-MM-dd" showIcon="true"/>
+                </div>
+                <div class="col-6">
+                    <p:outputLabel for="sexo" value="Sexo"/>
+                    <p:selectOneMenu id="sexo" value="#{patientBean.sexo}">
+                        <f:selectItem itemLabel="Masculino" itemValue="M"/>
+                        <f:selectItem itemLabel="Feminino"  itemValue="F"/>
+                        <f:selectItem itemLabel="Outro"     itemValue="O"/>
+                    </p:selectOneMenu>
+                </div>
+            </div>
+
+            <p:commandButton value="Criar" actionListener="#{patientBean.create}"
+                             update=":form:patientsTable :form:msgs"
+                             styleClass="ui-button-success" icon="pi pi-plus"/>
+        </p:panel>
+
+        <br/>
+
+        <p:panel header="Pacientes Cadastrados">
+            <p:dataTable id="patientsTable" var="p" value="#{patientBean.patients}" rowKey="#{p.uuid}"
+                         paginator="true" rows="10" rowsPerPageTemplate="5,10,20" emptyMessage="Sem registros">
+                <p:column headerText="UUID" style="width:320px">#{p.uuid}</p:column>
+                <p:column headerText="Nome">#{p.nome}</p:column>
+                <p:column headerText="CPF">#{p.cpf}</p:column>
+                <p:column headerText="Sexo" style="width:80px">#{p.sexo}</p:column>
+                <p:column headerText="Ações" style="width:140px;text-align:center">
+                    <p:commandButton value="Remover"
+                                     actionListener="#{patientBean.delete(p.uuid)}"
+                                     update=":form:patientsTable :form:msgs"
+                                     styleClass="ui-button-danger" icon="pi pi-trash"
+                                     process="@this"/>
+                </p:column>
+            </p:dataTable>
+        </p:panel>
+
+    </h:form>
+
+</h:body>
+</html>
