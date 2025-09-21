@@ -1,8 +1,8 @@
 package com.medical_clinical_app.resource;
 
-import com.medical_clinical_app.dto.patient.request.PatientCreateDTO;
-import com.medical_clinical_app.dto.patient.request.PatientUpdateDTO;
-import com.medical_clinical_app.dto.patient.response.PatientDTO;
+import com.medical_clinical_app.dto.patient.request.PatientCreateRequest;
+import com.medical_clinical_app.dto.patient.request.PatientUpdateRequest;
+import com.medical_clinical_app.dto.patient.response.PatientResponse;
 import com.medical_clinical_app.model.Patient;
 import com.medical_clinical_app.service.PatientService;
 import jakarta.enterprise.context.RequestScoped;
@@ -25,7 +25,7 @@ public class PatientResource {
     PatientService patientService;
 
     @GET
-    public List<Patient> list(@QueryParam("page") @DefaultValue("0") int page,
+    public List<Patient> getAllPatient(@QueryParam("page") @DefaultValue("0") int page,
                               @QueryParam("size") @DefaultValue("20") int size) {
         return patientService.listAll(page, size);
     }
@@ -40,8 +40,8 @@ public class PatientResource {
     }
 
     @POST
-    public Response createPatient(@Valid PatientCreateDTO dto, @Context UriInfo uriInfo) {
-        PatientDTO created = patientService.create(dto);
+    public Response createPatient(@Valid PatientCreateRequest dto, @Context UriInfo uriInfo) {
+        PatientResponse created = patientService.create(dto);
         // Location: /api/patients/{uuid}
         UriBuilder uri = uriInfo.getAbsolutePathBuilder().path(created.getUuid());
         return Response.created(uri.build())   // 201 Created + Location
@@ -50,13 +50,13 @@ public class PatientResource {
     }
 
     @PUT
-    public Response updatePatientById(String idPatient, @Valid PatientUpdateDTO dto, @Context UriInfo uriInfo) {
-        PatientDTO update = patientService.update(idPatient, dto);
-        // Location: /api/patients/{uuid}
-        UriBuilder uri = uriInfo.getAbsolutePathBuilder().path(update.getUuid());
-        return Response.created(uri.build())
-                .entity(update)
-                .build();
+    @Path("{uuid}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updatePatient(@PathParam("uuid") String uuid,
+                                  @Valid PatientUpdateRequest dto) {
+        PatientResponse updated = patientService.update(uuid, dto);
+        return Response.ok(updated).build(); // 200 OK
     }
 
     @DELETE

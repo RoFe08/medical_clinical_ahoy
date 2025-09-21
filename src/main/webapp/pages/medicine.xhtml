@@ -10,9 +10,10 @@
 <h:body>
     <h1>Gestão de Medicamentos</h1>
 
-    <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
-
     <h:form id="form">
+        <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
+
+        <!-- Criar -->
         <p:panel header="Criar Medicamento" style="max-width:600px">
             <div class="grid">
                 <div class="col-6">
@@ -29,19 +30,34 @@
                 </div>
             </div>
 
-            <p:commandButton value="Criar" actionListener="#{medicineBean.create}"
+            <p:commandButton value="Criar"
+                             actionListener="#{medicineBean.create}"
                              update=":form:table :form:msgs"
                              styleClass="ui-button-success" icon="pi pi-plus"/>
         </p:panel>
 
         <br/>
 
+        <!-- Lista -->
         <p:panel header="Medicamentos Cadastrados">
-            <p:dataTable id="table" var="m" value="#{medicineBean.medicines}" paginator="true" rows="10">
+            <p:dataTable id="table" var="m" value="#{medicineBean.medicines}"
+                         paginator="true" rows="10" rowsPerPageTemplate="5,10,20"
+                         emptyMessage="Sem registros" rowKey="#{m.uuid}">
+
                 <p:column headerText="UUID" style="width:320px">#{m.uuid}</p:column>
                 <p:column headerText="Nome">#{m.nome}</p:column>
-                <p:column headerText="Controlado" style="width:120px">#{m.controlado ? 'Sim' : 'Não'}</p:column>
-                <p:column headerText="Ações" style="width:140px;text-align:center">
+                <p:column headerText="Controlado" style="width:120px">
+                    #{m.controlado ? 'Sim' : 'Não'}
+                </p:column>
+                <p:column headerText="Posologia">#{m.posologia}</p:column>
+
+                <p:column headerText="Ações" style="width:220px;text-align:center">
+                    <p:commandButton value="Editar"
+                                     actionListener="#{medicineBean.openEdit(m)}"
+                                     update=":editForm" oncomplete="PF('editDlgWV').show()"
+                                     styleClass="ui-button-secondary" icon="pi pi-pencil"
+                                     style="margin-right:8px" process="@this"/>
+
                     <p:commandButton value="Remover"
                                      actionListener="#{medicineBean.delete(m.uuid)}"
                                      update=":form:table :form:msgs"
@@ -52,5 +68,33 @@
         </p:panel>
     </h:form>
 
+    <!-- Dialog de edição (form próprio para garantir submit) -->
+    <p:dialog id="editDlg" header="Editar Medicamento" widgetVar="editDlgWV"
+              modal="true" closable="true" resizable="false" width="560">
+        <h:form id="editForm">
+            <h:panelGrid columns="2" columnClasses="col1,col2" styleClass="grid">
+                <p:outputLabel for="eNome" value="Nome"/>
+                <p:inputText id="eNome" value="#{medicineBean.editNome}" required="true"/>
+
+                <p:outputLabel for="eControlado" value="Controlado?"/>
+                <p:selectBooleanCheckbox id="eControlado" value="#{medicineBean.editControlado}"/>
+
+                <p:outputLabel for="ePosologia" value="Posologia"/>
+                <p:inputTextarea id="ePosologia" value="#{medicineBean.editPosologia}" rows="3" autoResize="true"/>
+            </h:panelGrid>
+
+            <p:separator style="margin:8px 0"/>
+
+            <p:commandButton value="Salvar"
+                             action="#{medicineBean.update}"
+                             process="@form"
+                             update=":form:table :form:msgs"
+                             oncomplete="if (!args.validationFailed) PF('editDlgWV').hide();"
+                             styleClass="ui-button-success" icon="pi pi-check"/>
+            <p:spacer width="8"/>
+            <p:commandButton type="button" value="Cancelar"
+                             onclick="PF('editDlgWV').hide()" icon="pi pi-times"/>
+        </h:form>
+    </p:dialog>
 </h:body>
 </html>

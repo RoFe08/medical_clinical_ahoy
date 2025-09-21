@@ -1,7 +1,7 @@
 package com.medical_clinical_app.view;
 
-import com.medical_clinical_app.dto.MedicineCreateRequest;
-import com.medical_clinical_app.dto.MedicineResponse;
+import com.medical_clinical_app.dto.medicine.request.MedicineCreateRequest;
+import com.medical_clinical_app.dto.medicine.response.MedicineResponse;
 import com.medical_clinical_app.service.MedicineService;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
@@ -9,12 +9,14 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Named("medicineBean")
 @RequestScoped
+@Data
 public class MedicineBean implements Serializable {
 
     @Inject
@@ -23,6 +25,11 @@ public class MedicineBean implements Serializable {
     private String nome;
     private Boolean controlado;
     private String posologia;
+
+    private String editUuid;
+    private String editNome;
+    private Boolean editControlado;
+    private String editPosologia;
 
     private List<MedicineResponse> medicines;
 
@@ -62,6 +69,28 @@ public class MedicineBean implements Serializable {
         }
     }
 
+    public void openEdit(MedicineResponse m) {
+        this.editUuid       = m.uuid;
+        this.editNome       = m.nome;
+        this.editControlado = m.controlado;
+        this.editPosologia  = m.posologia;
+    }
+
+    public void update() {
+        try {
+            var dto = new com.medical_clinical_app.dto.medicine.request.MedicineUpdateRequest();
+            dto.nome       = editNome;
+            dto.controlado = editControlado;
+            dto.posologia  = editPosologia;
+
+            medicineService.updateByUuid(editUuid, dto);
+            addInfo("Medicamento atualizado.");
+            refresh();
+        } catch (Exception e) {
+            addError("Erro ao atualizar: " + msg(e));
+        }
+    }
+
     private void clear() {
         nome = null;
         controlado = null;
@@ -78,11 +107,4 @@ public class MedicineBean implements Serializable {
     }
     private String msg(Throwable t) { return t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName(); }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-    public Boolean getControlado() { return controlado; }
-    public void setControlado(Boolean controlado) { this.controlado = controlado; }
-    public String getPosologia() { return posologia; }
-    public void setPosologia(String posologia) { this.posologia = posologia; }
-    public List<MedicineResponse> getMedicines() { return medicines; }
 }

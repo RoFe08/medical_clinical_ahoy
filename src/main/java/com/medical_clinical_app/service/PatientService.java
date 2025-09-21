@@ -1,10 +1,9 @@
 package com.medical_clinical_app.service;
 
 import com.medical_clinical_app.dao.PatientDAO;
-import com.medical_clinical_app.dto.patient.request.PatientCreateDTO;
-import com.medical_clinical_app.dto.patient.request.PatientUpdateDTO;
-import com.medical_clinical_app.dto.patient.response.PatientDTO;
-import com.medical_clinical_app.model.Medicine;
+import com.medical_clinical_app.dto.patient.request.PatientCreateRequest;
+import com.medical_clinical_app.dto.patient.request.PatientUpdateRequest;
+import com.medical_clinical_app.dto.patient.response.PatientResponse;
 import com.medical_clinical_app.model.Patient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,19 +24,19 @@ public class PatientService {
     EntityManager em;
 
     @Transactional
-    public PatientDTO create(PatientCreateDTO createDTO) {
+    public PatientResponse create(PatientCreateRequest createDTO) {
         Patient patient = createDTOToEntity(createDTO);
         patient = patientDAO.save(patient);
         return entityToPatientDTO(patient);
     }
 
-    public PatientDTO getByUuid(String uuid) {
+    public PatientResponse getByUuid(String uuid) {
         Patient p = patientDAO.findByUuid(uuid);
         return entityToPatientDTO(p);
     }
 
     @Transactional
-    public PatientDTO update(String uuid, PatientUpdateDTO updateDTO) {
+    public PatientResponse update(String uuid, PatientUpdateRequest updateDTO) {
         Patient patient = Optional.ofNullable(patientDAO.findByUuid(uuid))
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado"));
 
@@ -59,17 +58,19 @@ public class PatientService {
     }
 
     @Transactional
-    public boolean deleteByUuid(String uuid) {
-        List<Patient> list = em.createQuery(
-                        "SELECT m FROM Medicine m WHERE m.uuid = :u", Patient.class)
+    public void deleteByUuid(String uuid) {
+        Patient p = em.createQuery(
+                        "SELECT p FROM Patient p WHERE p.uuid = :u", Patient.class)
                 .setParameter("u", uuid)
                 .setMaxResults(1)
-                .getResultList();
-        if (list.isEmpty()) return false;
-        em.remove(list.get(0));
-        return true;
-    }
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
 
+        if (p != null) {
+            em.remove(em.contains(p) ? p : em.merge(p));
+        }
+    }
     public List<Patient> listAll(int page, int size) {
         return patientDAO.findAll(page, size);
     }
@@ -78,7 +79,7 @@ public class PatientService {
         return patientDAO.searchByNameOrCpf(search, page, size);
     }
 
-    private Patient createDTOToEntity(PatientCreateDTO dto) {
+    private Patient createDTOToEntity(PatientCreateRequest dto) {
         return Patient.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())
@@ -87,8 +88,8 @@ public class PatientService {
                 .build();
     }
 
-    private PatientDTO entityToPatientDTO(Patient entity) {
-        return PatientDTO.builder()
+    private PatientResponse entityToPatientDTO(Patient entity) {
+        return PatientResponse.builder()
                 .idPaciente(entity.getIdPaciente())
                 .uuid(entity.getUuid())
                 .nome(entity.getNome())

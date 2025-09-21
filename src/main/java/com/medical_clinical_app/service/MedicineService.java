@@ -1,8 +1,8 @@
 package com.medical_clinical_app.service;
 
-import com.medical_clinical_app.dto.MedicineCreateRequest;
-import com.medical_clinical_app.dto.MedicineResponse;
-import com.medical_clinical_app.dto.MedicineUpdateRequest;
+import com.medical_clinical_app.dto.medicine.request.MedicineCreateRequest;
+import com.medical_clinical_app.dto.medicine.response.MedicineResponse;
+import com.medical_clinical_app.dto.medicine.request.MedicineUpdateRequest;
 import com.medical_clinical_app.model.Medicine;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -38,20 +38,23 @@ public class MedicineService {
     public List<MedicineResponse> list(String nomeLike, int page, int size) {
         size = Math.min(Math.max(size, 1), 100);
 
-        String jpql = """
-            SELECT m FROM Medicine m
-            WHERE (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
-            ORDER BY m.idMedicamento DESC
-            """;
+        String filtro = (nomeLike == null || nomeLike.isBlank())
+                ? null
+                : "%" + nomeLike.trim().toLowerCase() + "%";
+
+        String jpql =
+                "SELECT m FROM Medicine m " +
+                        "WHERE (:f IS NULL OR LOWER(m.nome) LIKE :f) " +
+                        "ORDER BY m.idMedicamento DESC";
 
         return em.createQuery(jpql, Medicine.class)
-                .setParameter("nome", (nomeLike == null || nomeLike.isBlank()) ? null : nomeLike.trim())
+                .setParameter("f", filtro)
                 .setFirstResult(page * size)
                 .setMaxResults(size)
                 .getResultList()
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .collect(java.util.stream.Collectors.toList());
     }
 
     public List<MedicineResponse> listAll(int page, int size) {
@@ -59,8 +62,15 @@ public class MedicineService {
     }
 
     @Transactional
-    public MedicineResponse update(Long id, MedicineUpdateRequest req) {
-        Medicine m = em.find(Medicine.class, id);
+    public MedicineResponse updateByUuid(String uuid, MedicineUpdateRequest req) {
+        Medicine m = em.createQuery(
+                        "SELECT m FROM Medicine m WHERE m.uuid = :u", Medicine.class)
+                .setParameter("u", uuid)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
         if (m == null) return null;
 
         if (req.nome != null)        m.setNome(req.nome);
@@ -91,13 +101,13 @@ public class MedicineService {
     }
 
     private MedicineResponse toResponse(Medicine m) {
-        MedicineResponse r = new MedicineResponse();
-        r.idMedicamento = m.getIdMedicamento();
-        r.uuid          = m.getUuid();
-        r.nome          = m.getNome();
-        r.controlado    = m.getControlado();
-        r.posologia     = m.getPosologia();
-        r.dataCadastro  = m.getDataCadastro();
-        return r;
+        return MedicineResponse.builder()
+                .idMedicamento(m.getIdMedicamento())
+                .uuid(m.getUuid())
+                .nome(m.getNome())
+                .controlado(m.getControlado())
+                .posologia(m.getPosologia())
+                .dataCadastro(m.getDataCadastro())
+                .build();
     }
 }
