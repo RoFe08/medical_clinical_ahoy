@@ -42,10 +42,9 @@ public class PatientResource {
     @POST
     public Response createPatient(@Valid PatientCreateRequest dto, @Context UriInfo uriInfo) {
         PatientResponse created = patientService.create(dto);
-        // Location: /api/patients/{uuid}
         UriBuilder uri = uriInfo.getAbsolutePathBuilder().path(created.getUuid());
-        return Response.created(uri.build())   // 201 Created + Location
-                .entity(created)        // corpo com o DTO criado
+        return Response.created(uri.build())
+                .entity(created)
                 .build();
     }
 

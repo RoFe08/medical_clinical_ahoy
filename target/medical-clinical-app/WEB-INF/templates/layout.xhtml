@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title><ui:insert name="title">Medical Clinical</ui:insert></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- PrimeIcons + tema -->
+    <link rel="stylesheet" href="#{request.contextPath}/javax.faces.resource/primeicons/primeicons.css.jsf?ln=primefaces" />
+    <link rel="stylesheet" href="#{request.contextPath}/resources/css/theme.css" />
+</h:head>
+<h:body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="container" style="display:flex; align-items:center; justify-content:space-between; padding:14px 0;">
+            <div class="brand">
+                <span class="logo"><i class="pi pi-heart"></i></span>
+                <span>ICI Saude</span>
+                <span class="badge"><i class="pi pi-shield"></i> Clinica</span>
+            </div>
+            <div style="display:flex; gap:.6rem;">
+                <h:link outcome="/index" styleClass="btn secondary"><i class="pi pi-home"></i>&#160;Inicio</h:link>
+                <h:link outcome="/pages/patient" styleClass="btn secondary"><i class="pi pi-users"></i>&#160;Pacientes</h:link>
+                <h:link outcome="/pages/medicine" styleClass="btn secondary"><i class="pi pi-pills"></i>&#160;Medicamentos</h:link>
+                <h:link outcome="/pages/prescription" styleClass="btn secondary"><i class="pi pi-file-edit"></i>&#160;Receitas</h:link>
+                <h:link outcome="/pages/reports" styleClass="btn"><i class="pi pi-chart-line"></i>&#160;Relatorios</h:link>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="container">
+        <div class="card">
+            <ui:insert name="content"/>
+        </div>
+    </div>
+
+</h:body>
+</html>

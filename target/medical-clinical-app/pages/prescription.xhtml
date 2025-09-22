@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">Receita Médica · Medical Clinical</ui:define>
+
+    <ui:define name="content">
+
+        <h2 style="margin-top:0;"><i class="pi pi-file-plus"></i> Cadastro de Receita</h2>
+
+        <h:form id="form">
+            <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
+
+            <!-- Dados da receita -->
+            <div class="card" style="margin-bottom:24px;">
+                <h3><i class="pi pi-user"></i> Dados da Receita</h3>
+                <div class="grid" style="margin-top:12px;">
+                    <div class="col-6">
+                        <p:outputLabel for="paciente" value="Paciente"/>
+                        <p:selectOneMenu id="paciente" value="#{prescriptionBean.patientUuid}" required="true" style="width:100%">
+                            <f:selectItem itemLabel="Selecione..." itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{prescriptionBean.patients}" var="p"
+                                           itemLabel="#{p.nome} (#{p.cpf})" itemValue="#{p.uuid}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="col-6">
+                        <p:outputLabel for="data" value="Data da Prescrição"/>
+                        <p:datePicker id="data" value="#{prescriptionBean.prescriptionDate}"
+                                      pattern="yyyy-MM-dd" showIcon="true" required="true"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adicionar medicamento -->
+            <div class="card" style="margin-bottom:24px;">
+                <h3><i class="pi pi-pills"></i> Adicionar Medicamento</h3>
+                <div class="grid" style="margin-top:12px;">
+                    <div class="col-8">
+                        <p:outputLabel for="med" value="Medicamento"/>
+                        <p:selectOneMenu id="med" value="#{prescriptionBean.newMedicineUuid}" style="width:100%">
+                            <f:selectItem itemLabel="Selecione..." itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{prescriptionBean.medicines}" var="m"
+                                           itemLabel="#{m.nome} (#{m.controlado ? 'Controlado' : 'Comum'})"
+                                           itemValue="#{m.uuid}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="col-2">
+                        <p:outputLabel for="qty" value="Qtde"/>
+                        <p:inputNumber id="qty" value="#{prescriptionBean.newQuantity}" minValue="1"/>
+                    </div>
+                    <div class="col-2" style="padding-top:22px">
+                        <p:commandButton value="Adicionar"
+                                         actionListener="#{prescriptionBean.addItem}"
+                                         update=":form:items :form:msgs"
+                                         icon="pi pi-plus" process="@this"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Itens da receita -->
+            <div class="card" style="margin-bottom:24px;">
+                <h3><i class="pi pi-list"></i> Medicamentos da Receita</h3>
+                <p:dataTable id="items" var="it" value="#{prescriptionBean.items}"
+                             emptyMessage="Nenhum item adicionado" paginator="true" rows="5"
+                             style="margin-top:12px;">
+                    <p:column headerText="Medicamento">#{it.medicineName}</p:column>
+                    <p:column headerText="Quantidade" style="width:120px;text-align:center">#{it.quantity}</p:column>
+                    <p:column headerText="Ações" style="width:140px;text-align:center">
+                        <p:commandButton value="Remover"
+                                         icon="pi pi-trash" styleClass="ui-button-danger"
+                                         actionListener="#{prescriptionBean.removeItem(it.medicineUuid)}"
+                                         update=":form:items :form:msgs" process="@this"/>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <p:commandButton value="Salvar Receita"
+                             actionListener="#{prescriptionBean.save}"
+                             update=":form:msgs :form:items"
+                             icon="pi pi-check" styleClass="ui-button-success"/>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

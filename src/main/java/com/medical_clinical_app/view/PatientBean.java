@@ -116,7 +116,6 @@ public class PatientBean implements Serializable {
 
     public void update() {
         try {
-            // monta o DTO de atualização (campos opcionais)
             PatientUpdateRequest dto = PatientUpdateRequest.builder()
                     .nome(editNome)
                     .cpf(editCpf)

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="title">Relatórios · Medical Clinical</ui:define>
+
+    <ui:define name="content">
+
+        <h2 style="margin-top:0;"><i class="pi pi-chart-bar"></i> Relatórios</h2>
+        <p:messages id="msgs" autoUpdate="true"/>
+
+        <h:form id="form">
+            <div class="card" style="margin-bottom:24px;">
+                <h3><i class="pi pi-pills"></i> Top 2 Medicamentos mais prescritos (quantidade)</h3>
+                <p:dataTable var="m" value="#{reportBean.topMedicines}" emptyMessage="Sem dados" style="margin-top:12px;">
+                    <p:column headerText="Medicamento">#{m.medicineName}</p:column>
+                    <p:column headerText="Quantidade total" style="width:180px; text-align:right">
+                        #{m.totalQuantity}
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <div class="card" style="margin-bottom:24px;">
+                <h3><i class="pi pi-users"></i> Top 2 Pacientes com mais medicamentos prescritos</h3>
+                <p:dataTable var="p" value="#{reportBean.topPatients}" emptyMessage="Sem dados" style="margin-top:12px;">
+                    <p:column headerText="Paciente">#{p.patientName}</p:column>
+                    <p:column headerText="Quantidade total" style="width:180px; text-align:right">
+                        #{p.totalQuantity}
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <div class="card">
+                <h3><i class="pi pi-filter"></i> Totais por medicamento (filtrar por paciente)</h3>
+
+                <div class="grid" style="margin-top:12px;">
+                    <div class="col-6">
+                        <p:outputLabel for="patient" value="Paciente"/>
+                        <p:selectOneMenu id="patient" value="#{reportBean.selectedPatientId}" style="width:100%">
+                            <f:selectItem itemLabel="-- Selecione --" itemValue="#{null}"/>
+                            <f:selectItems value="#{reportBean.patientsForFilter}"
+                                           var="pat"
+                                           itemValue="#{pat.idPaciente}"
+                                           itemLabel="#{pat.nome}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="col-6" style="margin-top:1.75rem">
+                        <p:commandButton value="Carregar"
+                                         actionListener="#{reportBean.loadPatientTotals}"
+                                         update=":form:perPatientTable :form:totalsPanel :form:msgs"
+                                         icon="pi pi-search"/>
+                    </div>
+                </div>
+
+                <p:dataTable id="perPatientTable" var="r"
+                             value="#{reportBean.perPatientTotals}"
+                             paginator="true" rows="10"
+                             emptyMessage="Selecione um paciente e clique em Carregar"
+                             style="margin-top:12px;">
+                    <p:column headerText="Medicamento">#{r.medicineName}</p:column>
+                    <p:column headerText="Quantidade total" style="width:180px; text-align:right">
+                        #{r.totalQuantity}
+                    </p:column>
+                </p:dataTable>
+
+                <h:panelGroup id="totalsPanel">
+                    <h:panelGroup rendered="#{not empty reportBean.perPatientTotals}">
+                        <h3 style="margin-top:16px;">Total geral: #{reportBean.perPatientGrandTotal}</h3>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>
