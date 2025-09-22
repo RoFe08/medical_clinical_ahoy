@@ -14,7 +14,6 @@
         <p:messages id="msgs" autoUpdate="true"/>
 
         <h:form id="form">
-            <!-- Top 2 Medicamentos -->
             <div class="card" style="margin-bottom:24px;">
                 <h3><i class="pi pi-pills"></i> Top 2 Medicamentos mais prescritos (quantidade)</h3>
                 <p:dataTable var="m" value="#{reportBean.topMedicines}" emptyMessage="Sem dados" style="margin-top:12px;">
@@ -25,7 +24,6 @@
                 </p:dataTable>
             </div>
 
-            <!-- Top 2 Pacientes -->
             <div class="card" style="margin-bottom:24px;">
                 <h3><i class="pi pi-users"></i> Top 2 Pacientes com mais medicamentos prescritos</h3>
                 <p:dataTable var="p" value="#{reportBean.topPatients}" emptyMessage="Sem dados" style="margin-top:12px;">
@@ -36,7 +34,6 @@
                 </p:dataTable>
             </div>
 
-            <!-- Filtro por Paciente -->
             <div class="card">
                 <h3><i class="pi pi-filter"></i> Totais por medicamento (filtrar por paciente)</h3>
 

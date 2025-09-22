@@ -18,7 +18,6 @@
         <h:form id="form">
             <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
 
-            <!-- Criar -->
             <div class="card" style="margin-bottom:24px;">
                 <h3><i class="pi pi-plus-circle"></i>&#160; Novo Medicamento</h3>
 
@@ -47,7 +46,6 @@
                                  style="margin-top:12px;"/>
             </div>
 
-            <!-- Lista -->
             <div class="card">
                 <h3><i class="pi pi-list"></i>&#160; Medicamentos Cadastrados</h3>
 
@@ -80,10 +78,8 @@
                 </p:dataTable>
             </div>
 
-            <!-- Dialog de edição -->
             <p:dialog id="editDlg" header="Editar Medicamento" widgetVar="editDlgWV"
                       modal="true" closable="true" resizable="false" width="560">
-                <!-- form dentro do dialog para garantir submit -->
                 <h:form id="editForm">
                     <h:panelGrid columns="2" columnClasses="col1,col2" styleClass="grid">
                         <p:outputLabel for="eNome" value="Nome"/>

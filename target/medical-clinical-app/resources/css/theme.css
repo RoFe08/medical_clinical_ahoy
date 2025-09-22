@@ -1,13 +1,13 @@
 :root{
-  --bg:#0b1220;          /* fundo geral (navy bem escuro) */
-  --panel:#0f172a;       /* cartões/navbar */
+  --bg:#0b1220;
+  --panel:#0f172a;
   --panel-2:#111b2e;
-  --text:#e5e7eb;        /* texto claro */
-  --muted:#94a3b8;       /* texto secundário */
-  --primary:#10b981;     /* teal/emerald para CTAs */
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --primary:#10b981;
   --primary-600:#059669;
-  --accent:#8b5cf6;      /* roxo suave para detalhes */
-  --ring:#22d3ee;        /* ciano para focus/hover */
+  --accent:#8b5cf6;
+  --ring:#22d3ee;
   --border:#1f2a44;
 }
 
@@ -69,7 +69,6 @@ a:hover{ text-decoration:underline; }
   font-size:.85rem;
 }
 
-/* PrimeFaces ajustes rápidos */
 .ui-panel, .ui-datatable{
   background:transparent !important;
   border:none !important;
