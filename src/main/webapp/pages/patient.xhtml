@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="jakarta.faces.facelets"
-      xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="jakarta.faces.facelets"
+        xmlns:h="jakarta.faces.html"
+        xmlns:f="jakarta.faces.core"
+        xmlns:p="http://primefaces.org/ui"
+        template="/WEB-INF/templates/layout.xhtml">
 
-<ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="title">Pacientes · Medical Clinical</ui:define>
 
     <ui:define name="content">
@@ -14,107 +14,129 @@
             Crie, edite e remova pacientes cadastrados no sistema.
         </p>
 
-        <!-- ÚNICO form da página -->
         <h:form id="form">
-            <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
+            <p:messages id="msgs" showDetail="true" autoUpdate="true" redisplay="false"/>
 
             <div class="card" style="margin-bottom:24px;">
                 <h3><i class="pi pi-plus-circle"></i>&#160; Novo Paciente</h3>
+
                 <div class="grid" style="margin-top:12px;">
                     <div class="col-6">
                         <p:outputLabel for="nome" value="Nome"/>
-                        <p:inputText id="nome"
-                                     value="#{patientBean.nome}"
-                                     required="true"
-                                     label="Nome"
-                                     requiredMessage="Informe o Nome"/>
+                        <p:inputText id="nome" value="#{patientBean.nome}"
+                                     required="true" requiredMessage="Informe o Nome"/>
                     </div>
+
                     <div class="col-6">
                         <p:outputLabel for="cpf" value="CPF (11 dígitos)"/>
-                        <p:inputText id="cpf"
-                                     value="#{patientBean.cpf}"
-                                     maxlength="11"
-                                     required="true"
-                                     label="CPF"
-                                     requiredMessage="Informe o CPF"/>
+                        <p:inputText id="cpf" value="#{patientBean.cpf}"
+                                     maxlength="11" required="true" requiredMessage="Informe o CPF"/>
                     </div>
+
                     <div class="col-6">
                         <p:outputLabel for="dataNasc" value="Data Nascimento"/>
-                        <p:datePicker id="dataNasc"
-                                      value="#{patientBean.dataNascimento}"
-                                      pattern="yyyy-MM-dd"
-                                      showIcon="true"/>
+                        <p:datePicker id="dataNasc" value="#{patientBean.dataNascimento}"
+                                      pattern="yyyy-MM-dd" showIcon="true"
+                                      required="true" requiredMessage="Informe a Data de Nascimento">
+                            <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
+                        </p:datePicker>
                     </div>
+
                     <div class="col-6">
                         <p:outputLabel for="sexo" value="Sexo"/>
-                        <p:selectOneMenu id="sexo" value="#{patientBean.sexo}">
-                            <f:selectItem itemLabel="Masculino" itemValue="M"/>
-                            <f:selectItem itemLabel="Feminino"  itemValue="F"/>
-                            <f:selectItem itemLabel="Outro"     itemValue="O"/>
+                        <p:selectOneMenu id="sexo" value="#{patientBean.sexo}"
+                                         required="true" requiredMessage="Informe o Sexo">
+                            <f:selectItems value="#{patientBean.genders}" var="g"
+                                           itemValue="#{g}" itemLabel="#{g}"/>
                         </p:selectOneMenu>
                     </div>
                 </div>
 
                 <p:commandButton value="Criar"
-                                 actionListener="#{patientBean.create}"
+                                 action="#{patientBean.create}"
                                  process="@form"
                                  update=":form:patientsTable :form:msgs"
-                                 ajax="false"
-                                 partialSubmit="false"
-                                 styleClass="ui-button-success"
-                                 icon="pi pi-plus"/>
+                                 ajax="true"
+                                 icon="pi pi-plus"
+                                 styleClass="ui-button-success"/>
             </div>
 
             <div class="card">
                 <h3><i class="pi pi-list"></i>&#160; Pacientes Cadastrados</h3>
+
                 <p:dataTable id="patientsTable" var="p" value="#{patientBean.patients}"
                              rowKey="#{p.uuid}" paginator="true" rows="10"
-                             rowsPerPageTemplate="5,10,20" emptyMessage="Sem registros"
-                             style="margin-top:12px;">
+                             rowsPerPageTemplate="5,10,20"
+                             emptyMessage="Sem registros"
+                             style="margin-top:12px;"
+                             filterEvent="keyup"
+                widgetVar="patientsTableWV">
 
-                    <p:column headerText="UUID" style="width:280px">#{p.uuid}</p:column>
-                    <p:column headerText="Nome">#{p.nome}</p:column>
-                    <p:column headerText="CPF">#{p.cpf}</p:column>
-                    <p:column headerText="Sexo" style="width:100px">#{p.sexo}</p:column>
+                <p:column headerText="UUID" style="width:280px">#{p.uuid}</p:column>
 
-                    <p:column headerText="Ações" style="width:220px; text-align:center">
-                        <p:commandButton value="Editar"
-                                         actionListener="#{patientBean.openEdit(p)}"
-                                         update=":form:editDlg :form:msgs"
-                                         oncomplete="PF('editDlgWV').show()"
-                                         styleClass="ui-button-secondary"
-                                         style="margin-right:8px"
-                                         icon="pi pi-pencil"/>
+                <p:column headerText="Nome"
+                          filterBy="#{p.nome}"
+                          filterMatchMode="contains"
+                          filterPlaceholder="Pesquisar por nome">
+                    #{p.nome}
+                </p:column>
 
-                        <p:commandButton value="Remover"
-                                         actionListener="#{patientBean.delete(p.uuid)}"
-                                         process="@this"
-                                         update=":form:patientsTable :form:msgs"
-                                         styleClass="ui-button-danger"
-                                         icon="pi pi-trash"/>
-                    </p:column>
-                </p:dataTable>
+                <p:column headerText="CPF"
+                          filterBy="#{p.cpf}"
+                          filterMatchMode="contains"
+                          filterPlaceholder="Pesquisar por CPF">
+                    #{p.cpf}
+                </p:column>
+
+                <p:column headerText="Sexo" style="width:100px">#{p.sexo}</p:column>
+
+                <p:column headerText="Ações" style="width:220px; text-align:center">
+                    <p:commandButton value="Editar"
+                                     actionListener="#{patientBean.openEdit(p)}"
+                                     process="@this"
+                                     update=":editForm:editPanel :editForm:editMsgs"
+                                     oncomplete="PF('editDlgWV').show()"
+                                     styleClass="ui-button-secondary"
+                                     style="margin-right:8px"
+                                     icon="pi pi-pencil"/>
+                    <p:commandButton value="Remover"
+                                     actionListener="#{patientBean.delete(p.uuid)}"
+                                     process="@this"
+                                     update=":form:patientsTable :form:msgs"
+                                     styleClass="ui-button-danger"
+                                     icon="pi pi-trash"/>
+                </p:column>
+            </p:dataTable>
             </div>
+        </h:form>
 
-            <!-- Dialog SEM outro <h:form> -->
-            <p:dialog id="editDlg" header="Editar Paciente" widgetVar="editDlgWV"
-                      modal="true" closable="true" resizable="false" width="520">
-                <h:panelGrid columns="2" styleClass="grid">
+        <p:dialog id="editDlg" header="Editar Paciente" widgetVar="editDlgWV"
+                  modal="true" closable="true" resizable="false" width="520"
+                  appendTo="@(body)">
+            <h:form id="editForm">
+                <p:messages id="editMsgs" showDetail="true" autoUpdate="true" redisplay="false"/>
+
+                <h:panelGrid id="editPanel" columns="2" styleClass="grid">
                     <p:outputLabel for="eNome" value="Nome"/>
-                    <p:inputText id="eNome" value="#{patientBean.editNome}" required="true"/>
+                    <p:inputText id="eNome" value="#{patientBean.editNome}" required="true"
+                                 requiredMessage="Informe o Nome"/>
 
                     <p:outputLabel for="eCpf" value="CPF (11 dígitos)"/>
-                    <p:inputText id="eCpf" value="#{patientBean.editCpf}" maxlength="11" required="true"/>
+                    <p:inputText id="eCpf" value="#{patientBean.editCpf}" maxlength="11"
+                                 required="true" requiredMessage="Informe o CPF"/>
 
                     <p:outputLabel for="eData" value="Data Nascimento"/>
                     <p:datePicker id="eData" value="#{patientBean.editDataNascimento}"
-                                  pattern="yyyy-MM-dd" showIcon="true"/>
+                                  pattern="yyyy-MM-dd" showIcon="true"
+                                  required="true" requiredMessage="Informe a Data de Nascimento">
+                        <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
+                    </p:datePicker>
 
                     <p:outputLabel for="eSexo" value="Sexo"/>
-                    <p:selectOneMenu id="eSexo" value="#{patientBean.editSexo}">
-                        <f:selectItem itemLabel="Masculino" itemValue="M"/>
-                        <f:selectItem itemLabel="Feminino"  itemValue="F"/>
-                        <f:selectItem itemLabel="Outro"     itemValue="O"/>
+                    <p:selectOneMenu id="eSexo" value="#{patientBean.editSexo}"
+                                     required="true" requiredMessage="Informe o Sexo">
+                        <f:selectItems value="#{patientBean.genders}" var="g"
+                                       itemValue="#{g}" itemLabel="#{g}"/>
                     </p:selectOneMenu>
                 </h:panelGrid>
 
@@ -130,9 +152,8 @@
                 <p:spacer width="8"/>
                 <p:commandButton type="button" value="Cancelar"
                                  onclick="PF('editDlgWV').hide()" icon="pi pi-times"/>
-            </p:dialog>
+            </h:form>
+        </p:dialog>
 
-        </h:form>
     </ui:define>
 </ui:composition>
-</html>

@@ -7,6 +7,8 @@ com/medical_clinical_app/dto/medicine/response/MedicineResponse$MedicineResponse
 com/medical_clinical_app/model/Medicine.class
 com/medical_clinical_app/model/Medicine$MedicineBuilder.class
 com/medical_clinical_app/dto/report/MedicineAggregate.class
+com/medical_clinical_app/dto/medicine/request/MedicineUpdateRequest$MedicineUpdateRequestBuilder.class
+com/medical_clinical_app/view/PrescriptionBean$ItemVM.class
 com/medical_clinical_app/model/Prescription$PrescriptionBuilder.class
 com/medical_clinical_app/model/PrescriptionItem.class
 com/medical_clinical_app/view/PrescriptionBean.class
@@ -18,7 +20,6 @@ com/medical_clinical_app/dto/patient/response/PatientResponse.class
 com/medical_clinical_app/view/PatientBean.class
 com/medical_clinical_app/resource/MedicineResource.class
 com/medical_clinical_app/dao/PatientDAO.class
-com/medical_clinical_app/view/PrescriptionBean$ItemRow.class
 com/medical_clinical_app/resource/PatientResource.class
 com/medical_clinical_app/service/PrescriptionService$ItemInput.class
 com/medical_clinical_app/service/MedicineService.class

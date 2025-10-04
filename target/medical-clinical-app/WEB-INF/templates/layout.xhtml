@@ -5,8 +5,8 @@
 <h:head>
     <title><ui:insert name="title">Medical Clinical</ui:insert></title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="stylesheet" href="#{request.contextPath}/javax.faces.resource/primeicons/primeicons.css.jsf?ln=primefaces" />
-    <link rel="stylesheet" href="#{request.contextPath}/resources/css/theme.css" />
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+    <h:outputStylesheet library="css"        name="theme.css"/>
 </h:head>
 <h:body>
 
@@ -18,11 +18,11 @@
                 <span class="badge"><i class="pi pi-shield"></i> Clinica</span>
             </div>
             <div style="display:flex; gap:.6rem;">
-                <h:link outcome="/index" styleClass="btn secondary"><i class="pi pi-home"></i>&#160;Inicio</h:link>
-                <h:link outcome="/pages/patient" styleClass="btn secondary"><i class="pi pi-users"></i>&#160;Pacientes</h:link>
-                <h:link outcome="/pages/medicine" styleClass="btn secondary"><i class="pi pi-medkit"></i>&#160;Medicamentos</h:link>
-                <h:link outcome="/pages/prescription" styleClass="btn secondary"><i class="pi pi-file-edit"></i>&#160;Receitas</h:link>
-                <h:link outcome="/pages/reports" styleClass="btn"><i class="pi pi-chart-line"></i>&#160;Relatorios</h:link>
+                <h:link outcome="/index.xhtml" styleClass="btn secondary"><i class="pi pi-home"></i>&#160;Inicio</h:link>
+                <h:link outcome="/pages/patient.xhtml" styleClass="btn secondary"><i class="pi pi-users"></i>&#160;Pacientes</h:link>
+                <h:link outcome="/pages/medicine.xhtml" styleClass="btn secondary"><i class="pi pi-medkit"></i>&#160;Medicamentos</h:link>
+                <h:link outcome="/pages/prescription.xhtml" styleClass="btn secondary"><i class="pi pi-file-edit"></i>&#160;Receitas</h:link>
+                <h:link outcome="/pages/reports.xhtml" styleClass="btn"><i class="pi pi-chart-line"></i>&#160;Relatorios</h:link>
             </div>
         </div>
     </div>

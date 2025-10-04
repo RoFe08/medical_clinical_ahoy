@@ -45,6 +45,9 @@ public class Medicine {
     @Column(nullable = false, updatable = false, name = "data_cadastro")
     private LocalDateTime dataCadastro = LocalDateTime.now();
 
+//    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+//    @JoinColumn(name = "manufacture_id", nullable = false)
+//    private Manufacturer Manufacturer;
 
     @PrePersist
     public void generateUUID() {

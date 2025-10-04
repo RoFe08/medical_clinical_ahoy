@@ -1,53 +1,55 @@
 package com.medical_clinical_app.view;
 
-import com.medical_clinical_app.model.Medicine;
 import com.medical_clinical_app.service.MedicineService;
+import com.medical_clinical_app.service.PatientService;
 import com.medical_clinical_app.service.PrescriptionService;
 import com.medical_clinical_app.service.PrescriptionService.ItemInput;
-import com.medical_clinical_app.service.PatientService;
 import com.medical_clinical_app.dto.patient.response.PatientResponse;
 import com.medical_clinical_app.dto.medicine.response.MedicineResponse;
+
 import jakarta.annotation.PostConstruct;
-import jakarta.faces.view.ViewScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Named("prescriptionBean")
 @ViewScoped
-@Data
+@Getter
+@Setter
 public class PrescriptionBean implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    @Inject PatientService patientService;
-    @Inject MedicineService medicineService;
-    @Inject PrescriptionService prescriptionService;
+    @Inject private PatientService patientService;
+    @Inject private MedicineService medicineService;
+    @Inject private PrescriptionService prescriptionService;
 
     private String patientUuid;
-    private LocalDate prescriptionDate = LocalDate.now();
+    private LocalDate prescriptionDate;
+
+    private List<ItemVM> items = new ArrayList<>();
 
     private String newMedicineUuid;
-    private Integer newQuantity = 1;
+    private Integer newQuantity;
 
     private List<PatientResponse> patients;
     private List<MedicineResponse> medicines;
 
-    public static class ItemRow implements Serializable {
-        public String medicineUuid;
-        public String medicineName;
-        public Integer quantity;
-    }
-    private List<ItemRow> items = new ArrayList<>();
-
     @PostConstruct
     public void init() {
-        patients = patientService.listAll(0, 200).stream()
+        patients = patientService.listAll(0, 100)
+                .stream()
                 .map(p -> PatientResponse.builder()
                         .idPaciente(p.getIdPaciente())
                         .uuid(p.getUuid())
@@ -58,75 +60,105 @@ public class PrescriptionBean implements Serializable {
                         .dtInclusao(p.getDtInclusao())
                         .ativo(p.getAtivo())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
-        medicines = medicineService.listAll(0, 200);
+        medicines = medicineService.listAll(null, 0, 100).stream().map(medicine ->
+                        MedicineResponse.builder()
+                                .idMedicamento(medicine.getIdMedicamento())
+                                .uuid(medicine.getUuid())
+                                .nome(medicine.getNome())
+                                .controlado(medicine.getControlado())
+                                .posologia(medicine.getPosologia())
+                                .dataCadastro(medicine.getDataCadastro())
+                                .build())
+                .toList();
+        prescriptionDate = LocalDate.now();
+        newQuantity = 1;
     }
 
     public void addItem() {
         try {
             if (newMedicineUuid == null || newMedicineUuid.isBlank()) {
-                error("Selecione um medicamento.");
+                addWarn("Selecione um medicamento.");
                 return;
             }
             if (newQuantity == null || newQuantity < 1) {
-                error("Quantidade inválida.");
+                addWarn("Quantidade inválida.");
                 return;
             }
-            boolean exists = items.stream().anyMatch(i -> i.medicineUuid.equals(newMedicineUuid));
+            boolean exists = items.stream().anyMatch(i -> i.getMedicineUuid().equals(newMedicineUuid));
             if (exists) {
-                error("Este medicamento já foi adicionado.");
+                addWarn("Medicamento já adicionado.");
                 return;
             }
             MedicineResponse med = medicines.stream()
-                    .filter(m -> m.getUuid().equals(newMedicineUuid))
-                    .findFirst().orElse(null);
+                    .filter(m -> Objects.equals(m.getUuid(), newMedicineUuid))
+                    .findFirst()
+                    .orElse(null);
             if (med == null) {
-                error("Medicamento não encontrado.");
+                addError("Medicamento não encontrado.");
                 return;
             }
-            ItemRow row = new ItemRow();
-            row.medicineUuid = med.getUuid();
-            row.medicineName = med.getNome();
-            row.quantity = newQuantity;
-            items.add(row);
 
+            items.add(new ItemVM(newMedicineUuid, med.getNome(), newQuantity));
             newMedicineUuid = null;
             newQuantity = 1;
-            info("Item adicionado.");
+
+            addInfo("Item adicionado.");
         } catch (Exception e) {
-            error(msg(e));
+            addError(msg(e));
         }
     }
 
-    public void removeItem(String medUuid) {
-        items.removeIf(i -> Objects.equals(i.medicineUuid, medUuid));
-        info("Item removido.");
+    public void removeItem(String medicineUuid) {
+        items.removeIf(i -> Objects.equals(i.getMedicineUuid(), medicineUuid));
+        addInfo("Item removido.");
     }
 
     public void save() {
         try {
+            if (patientUuid == null || patientUuid.isBlank()) {
+                addWarn("Selecione o paciente."); return;
+            }
+            if (prescriptionDate == null) {
+                addWarn("Informe a data da prescrição."); return;
+            }
             if (items.isEmpty()) {
-                error("Inclua pelo menos um item.");
-                return;
+                addWarn("Inclua pelo menos 1 medicamento."); return;
             }
             List<ItemInput> payload = items.stream()
-                    .map(i -> new ItemInput(i.medicineUuid, i.quantity))
-                    .collect(Collectors.toList());
+                    .map(i -> new ItemInput(i.getMedicineUuid(), i.getQuantity()))
+                    .toList();
 
             String rxUuid = prescriptionService.createByUuids(patientUuid, prescriptionDate, payload);
 
-            info("Receita salva! UUID: " + rxUuid);
-            items.clear();
-            prescriptionDate = LocalDate.now();
-            patientUuid = null;
+            items = new ArrayList<>();
+            newMedicineUuid = null;
+            newQuantity = 1;
+
+            addInfo("Receita salva. UUID: " + rxUuid);
         } catch (Exception e) {
-            error(msg(e));
+            addError(msg(e));
         }
     }
 
-    private void info(String m) { FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, m, null)); }
-    private void error(String m) { FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, m, null)); }
-    private String msg(Throwable t) { return (t.getMessage() != null) ? t.getMessage() : t.getClass().getSimpleName(); }
+    private void addInfo(String m) { FacesContext.getCurrentInstance().addMessage(null,
+            new FacesMessage(FacesMessage.SEVERITY_INFO, m, null)); }
+    private void addWarn(String m) { FacesContext.getCurrentInstance().addMessage(null,
+            new FacesMessage(FacesMessage.SEVERITY_WARN, m, null)); }
+    private void addError(String m) { FacesContext.getCurrentInstance().addMessage(null,
+            new FacesMessage(FacesMessage.SEVERITY_ERROR, m, null)); }
+    private String msg(Throwable t){ return t.getMessage()!=null?t.getMessage():t.getClass().getSimpleName(); }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class ItemVM implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String medicineUuid;
+        private String medicineName;
+        private Integer quantity;
+    }
 
 }

@@ -1,20 +1,28 @@
 package com.medical_clinical_app.service;
 
+import com.medical_clinical_app.dao.MedicineDAO;
 import com.medical_clinical_app.dto.medicine.request.MedicineCreateRequest;
 import com.medical_clinical_app.dto.medicine.response.MedicineResponse;
 import com.medical_clinical_app.dto.medicine.request.MedicineUpdateRequest;
 import com.medical_clinical_app.model.Medicine;
 
+import com.medical_clinical_app.model.Patient;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class MedicineService {
+
+    @Inject
+    private MedicineDAO medicineDAO;
 
     @PersistenceContext(unitName = "appPU")
     EntityManager em;
@@ -27,80 +35,45 @@ public class MedicineService {
         m.setPosologia(req.posologia);
         em.persist(m);
         em.flush();
-        return toResponse(m);
+        return entityToMedicineDTO(m);
     }
 
     public MedicineResponse findById(Long id) {
         Medicine m = em.find(Medicine.class, id);
-        return (m == null) ? null : toResponse(m);
+        return (m == null) ? null : entityToMedicineDTO(m);
     }
 
-    public List<MedicineResponse> list(String nomeLike, int page, int size) {
-        size = Math.min(Math.max(size, 1), 100);
-
-        String filtro = (nomeLike == null || nomeLike.isBlank())
-                ? null
-                : "%" + nomeLike.trim().toLowerCase() + "%";
-
-        String jpql =
-                "SELECT m FROM Medicine m " +
-                        "WHERE (:f IS NULL OR LOWER(m.nome) LIKE :f) " +
-                        "ORDER BY m.idMedicamento DESC";
-
-        return em.createQuery(jpql, Medicine.class)
-                .setParameter("f", filtro)
-                .setFirstResult(page * size)
-                .setMaxResults(size)
-                .getResultList()
+    public List<MedicineResponse> listAll(String nome, int page, int size) {
+        return medicineDAO.list(null, page, size)
                 .stream()
-                .map(this::toResponse)
+                .map(this::entityToMedicineDTO)
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    public List<MedicineResponse> listAll(int page, int size) {
-        return list(null, page, size);
+    @Transactional
+    public MedicineResponse update(String uuid, MedicineUpdateRequest medicineDTO) {
+        var medicine = Optional.ofNullable(medicineDAO.findByUuid(uuid))
+                .orElseThrow(() -> new IllegalArgumentException("Medicamento não encontrado"));
+
+        Optional.ofNullable(medicineDTO.getNome()).ifPresent(medicine::setNome);
+        Optional.ofNullable(medicineDTO.getControlado()).ifPresent(medicine::setControlado);
+        Optional.ofNullable(medicineDTO.getPosologia()).ifPresent(medicine::setPosologia);
+
+        medicine = medicineDAO.update(medicine);
+        return entityToMedicineDTO(medicine);
     }
 
     @Transactional
-    public MedicineResponse updateByUuid(String uuid, MedicineUpdateRequest req) {
-        Medicine m = em.createQuery(
-                        "SELECT m FROM Medicine m WHERE m.uuid = :u", Medicine.class)
-                .setParameter("u", uuid)
-                .setMaxResults(1)
-                .getResultStream()
-                .findFirst()
-                .orElse(null);
+    public void delete(String uuid) {
+        var medicine = medicineDAO.findByUuid(uuid);
+        if (Objects.isNull(medicine)) {
+            throw new IllegalArgumentException("Medicamento não encontrado");
+        }
 
-        if (m == null) return null;
-
-        if (req.nome != null)        m.setNome(req.nome);
-        if (req.controlado != null)  m.setControlado(req.controlado);
-        if (req.posologia != null)   m.setPosologia(req.posologia);
-
-        return toResponse(m);
+        medicineDAO.delete(medicine.getUuid());
     }
 
-    @Transactional
-    public boolean delete(Long id) {
-        Medicine m = em.find(Medicine.class, id);
-        if (m == null) return false;
-        em.remove(m);
-        return true;
-    }
-
-    @Transactional
-    public boolean deleteByUuid(String uuid) {
-        List<Medicine> list = em.createQuery(
-                        "SELECT m FROM Medicine m WHERE m.uuid = :u", Medicine.class)
-                .setParameter("u", uuid)
-                .setMaxResults(1)
-                .getResultList();
-        if (list.isEmpty()) return false;
-        em.remove(list.get(0));
-        return true;
-    }
-
-    private MedicineResponse toResponse(Medicine m) {
+    private MedicineResponse entityToMedicineDTO(Medicine m) {
         return MedicineResponse.builder()
                 .idMedicamento(m.getIdMedicamento())
                 .uuid(m.getUuid())

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="jakarta.faces.facelets"
-      xmlns:h="jakarta.faces.html"
-      xmlns:p="http://primefaces.org/ui">
-<ui:composition template="/WEB-INF/templates/layout.xhtml">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/layout.xhtml">
+
     <ui:define name="title">Dashboard · Medical Clinical</ui:define>
 
     <ui:define name="content">
@@ -14,26 +14,28 @@
 
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:16px;">
             <div class="card">
-                <h3 style="margin:0 0 8px 0;"><i class="pi pi-users"></i>&#160;Pacientes</h3>
-                <p style="color:var(--muted); margin:0 0 12px 0;">Cadastre seus Pacientes</p>
+                <h3><i class="pi pi-users"></i>&#160;Pacientes</h3>
+                <p style="color:var(--muted);">Cadastre seus Pacientes</p>
                 <h:link outcome="/pages/patient" styleClass="btn"><i class="pi pi-arrow-right"></i>&#160;Abrir</h:link>
             </div>
+
             <div class="card">
-                <h3 style="margin:0 0 8px 0;"><i class="pi pi-capsules"></i>&#160;Medicamentos</h3>
-                <p style="color:var(--muted); margin:0 0 12px 0;">Cadastre seus Medicamentos.</p>
+                <h3><i class="pi pi-capsules"></i>&#160;Medicamentos</h3>
+                <p style="color:var(--muted);">Cadastre seus Medicamentos</p>
                 <h:link outcome="/pages/medicine" styleClass="btn"><i class="pi pi-arrow-right"></i>&#160;Abrir</h:link>
             </div>
+
             <div class="card">
-                <h3 style="margin:0 0 8px 0;"><i class="pi pi-file-edit"></i>&#160;Receitas</h3>
-                <p style="color:var(--muted); margin:0 0 12px 0;">Indique um medicamento a um paciente cadastrado.</p>
+                <h3><i class="pi pi-file-edit"></i>&#160;Receitas</h3>
+                <p style="color:var(--muted);">Indique um medicamento a um paciente cadastrado</p>
                 <h:link outcome="/pages/prescription" styleClass="btn"><i class="pi pi-arrow-right"></i>&#160;Abrir</h:link>
             </div>
+
             <div class="card">
-                <h3 style="margin:0 0 8px 0;"><i class="pi pi-chart-line"></i>&#160;Relatorios</h3>
-                <p style="color:var(--muted); margin:0 0 12px 0;">Informacoes inteligentes sobre pacientes e medicamentos.</p>
+                <h3><i class="pi pi-chart-line"></i>&#160;Relatórios</h3>
+                <p style="color:var(--muted);">Informações inteligentes sobre pacientes e medicamentos</p>
                 <h:link outcome="/pages/reports" styleClass="btn"><i class="pi pi-arrow-right"></i>&#160;Abrir</h:link>
             </div>
         </div>
     </ui:define>
 </ui:composition>
-</html>

@@ -39,7 +39,7 @@ public class MedicineResource {
                          @QueryParam("page") @DefaultValue("0") int page,
                          @QueryParam("size") @DefaultValue("20") int size) {
         size = Math.min(Math.max(size, 1), 100);
-        List<MedicineResponse> items = medicineService.list(name, page, size);
+        List<MedicineResponse> items = medicineService.listAll(name, page, size);
         return Response.ok(items).build();
     }
 
@@ -54,16 +54,15 @@ public class MedicineResource {
     @PUT
     @Path("{id}")
     public Response updateMedicineById(@PathParam("id") String id, MedicineUpdateRequest req) {
-        MedicineResponse r = medicineService.updateByUuid(id, req);
+        MedicineResponse r = medicineService.update(id, req);
         if (r == null) throw new NotFoundException("medicine not found");
         return Response.ok(r).build();
     }
 
     @DELETE
     @Path("{id}")
-    public Response deleteMedicineById(@PathParam("id") Long id) {
-        boolean ok = medicineService.delete(id);
-        if (!ok) throw new NotFoundException("medicine not found");
+    public Response deleteMedicineById(@PathParam("id") String uuid) {
+        medicineService.delete(uuid);
         return Response.noContent().build();
     }
 }

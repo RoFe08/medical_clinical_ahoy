@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="jakarta.faces.facelets"
-      xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="jakarta.faces.facelets"
+        xmlns:h="jakarta.faces.html"
+        xmlns:f="jakarta.faces.core"
+        xmlns:p="http://primefaces.org/ui"
+        template="/WEB-INF/templates/layout.xhtml">
 
-<ui:composition template="/WEB-INF/templates/layout.xhtml">
     <ui:define name="title">Medicamentos · Medical Clinical</ui:define>
 
     <ui:define name="content">
@@ -16,7 +16,7 @@
         </p>
 
         <h:form id="form">
-            <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
+            <p:messages id="msgs" showDetail="true" autoUpdate="true" redisplay="false"/>
 
             <div class="card" style="margin-bottom:24px;">
                 <h3><i class="pi pi-plus-circle"></i>&#160; Novo Medicamento</h3>
@@ -24,7 +24,8 @@
                 <div class="grid" style="margin-top:12px;">
                     <div class="col-6">
                         <p:outputLabel for="nome" value="Nome"/>
-                        <p:inputText id="nome" value="#{medicineBean.nome}" required="true"/>
+                        <p:inputText id="nome" value="#{medicineBean.nome}" required="true"
+                                     requiredMessage="Informe o Nome do medicamento"/>
                     </div>
                     <div class="col-6" style="display:flex;align-items:flex-end">
                         <div>
@@ -40,8 +41,10 @@
                 </div>
 
                 <p:commandButton value="Criar"
-                                 actionListener="#{medicineBean.create}"
+                                 action="#{medicineBean.create}"
+                                 process="@form"
                                  update=":form:table :form:msgs"
+                                 ajax="true"
                                  styleClass="ui-button-success" icon="pi pi-plus"
                                  style="margin-top:12px;"/>
             </div>
@@ -55,7 +58,12 @@
                              style="margin-top:12px;">
 
                     <p:column headerText="UUID" style="width:280px">#{m.uuid}</p:column>
-                    <p:column headerText="Nome">#{m.nome}</p:column>
+                    <p:column headerText="Nome"
+                              filterBy="#{m.nome}"
+                              filterMatchMode="contains"
+                              filterPlaceholder="Pesquisar por nome">
+                        #{m.nome}
+                    </p:column>
                     <p:column headerText="Controlado" style="width:120px">
                         #{m.controlado ? 'Sim' : 'Não'}
                     </p:column>
@@ -79,36 +87,37 @@
             </div>
 
             <p:dialog id="editDlg" header="Editar Medicamento" widgetVar="editDlgWV"
-                      modal="true" closable="true" resizable="false" width="560">
-                <h:form id="editForm">
-                    <h:panelGrid columns="2" columnClasses="col1,col2" styleClass="grid">
-                        <p:outputLabel for="eNome" value="Nome"/>
-                        <p:inputText id="eNome" value="#{medicineBean.editNome}" required="true"/>
+                      modal="true" closable="true" resizable="false" width="560"
+                      appendTo="@(body)">
 
-                        <p:outputLabel for="eControlado" value="Controlado?"/>
-                        <p:selectBooleanCheckbox id="eControlado" value="#{medicineBean.editControlado}"/>
+                <h:panelGrid id="editPanel" columns="2" columnClasses="col1,col2" styleClass="grid">
+                    <p:outputLabel for="eNome" value="Nome"/>
+                    <p:inputText id="eNome" value="#{medicineBean.editNome}" required="true"
+                                 requiredMessage="Informe o Nome do medicamento"/>
 
-                        <p:outputLabel for="ePosologia" value="Posologia"/>
-                        <p:inputTextarea id="ePosologia" value="#{medicineBean.editPosologia}" rows="3" autoResize="true"/>
-                    </h:panelGrid>
+                    <p:outputLabel for="eControlado" value="Controlado?"/>
+                    <p:selectBooleanCheckbox id="eControlado" value="#{medicineBean.editControlado}"/>
 
-                    <p:separator style="margin:8px 0"/>
+                    <p:outputLabel for="ePosologia" value="Posologia"/>
+                    <p:inputTextarea id="ePosologia" value="#{medicineBean.editPosologia}"
+                                     rows="3" autoResize="true"/>
+                </h:panelGrid>
 
-                    <p:commandButton value="Salvar"
-                                     action="#{medicineBean.update}"
-                                     process="@form"
-                                     update=":form:table :form:msgs"
-                                     oncomplete="if (!args.validationFailed) PF('editDlgWV').hide();"
-                                     styleClass="ui-button-success" icon="pi pi-check"/>
+                <p:separator style="margin:8px 0"/>
 
-                    <p:spacer width="8"/>
-                    <p:commandButton type="button" value="Cancelar"
-                                     onclick="PF('editDlgWV').hide()" icon="pi pi-times"/>
-                </h:form>
+                <p:commandButton value="Salvar"
+                                 action="#{medicineBean.update}"
+                                 process="editPanel"
+                                 update=":form:table :form:msgs"
+                                 oncomplete="if (!args.validationFailed) PF('editDlgWV').hide();"
+                                 styleClass="ui-button-success" icon="pi pi-check"/>
+
+                <p:spacer width="8"/>
+                <p:commandButton type="button" value="Cancelar"
+                                 onclick="PF('editDlgWV').hide()" icon="pi pi-times"/>
             </p:dialog>
 
         </h:form>
 
     </ui:define>
 </ui:composition>
-</html>

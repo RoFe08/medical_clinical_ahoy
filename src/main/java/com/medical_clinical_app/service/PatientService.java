@@ -57,20 +57,6 @@ public class PatientService {
         patientDAO.delete(patient);
     }
 
-    @Transactional
-    public void deleteByUuid(String uuid) {
-        Patient p = em.createQuery(
-                        "SELECT p FROM Patient p WHERE p.uuid = :u", Patient.class)
-                .setParameter("u", uuid)
-                .setMaxResults(1)
-                .getResultStream()
-                .findFirst()
-                .orElse(null);
-
-        if (p != null) {
-            em.remove(em.contains(p) ? p : em.merge(p));
-        }
-    }
     public List<Patient> listAll(int page, int size) {
         return patientDAO.findAll(page, size);
     }

@@ -2,21 +2,24 @@ package com.medical_clinical_app.view;
 
 import com.medical_clinical_app.dto.medicine.request.MedicineCreateRequest;
 import com.medical_clinical_app.dto.medicine.response.MedicineResponse;
+import com.medical_clinical_app.dto.medicine.request.MedicineUpdateRequest;
 import com.medical_clinical_app.service.MedicineService;
 import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Named("medicineBean")
-@RequestScoped
-@Data
+@ViewScoped
+@Getter
+@Setter
 public class MedicineBean implements Serializable {
 
     @Inject
@@ -39,7 +42,16 @@ public class MedicineBean implements Serializable {
     }
 
     public void refresh() {
-        medicines = medicineService.listAll(0, 100);
+        medicines = medicineService.listAll(null, 0, 100).stream().map(medicine ->
+                MedicineResponse.builder()
+                        .idMedicamento(medicine.getIdMedicamento())
+                        .uuid(medicine.getUuid())
+                        .nome(medicine.getNome())
+                        .controlado(medicine.getControlado())
+                        .posologia(medicine.getPosologia())
+                        .dataCadastro(medicine.getDataCadastro())
+                        .build())
+                .toList();
     }
 
     public void create() {
@@ -60,9 +72,7 @@ public class MedicineBean implements Serializable {
 
     public void delete(String uuid) {
         try {
-            boolean ok = medicineService.deleteByUuid(uuid);
-            if (ok) addInfo("Medicamento removido.");
-            else    addError("Medicamento não encontrado.");
+            medicineService.delete(uuid);
             refresh();
         } catch (Exception e) {
             addError("Erro ao remover: " + msg(e));
@@ -78,12 +88,13 @@ public class MedicineBean implements Serializable {
 
     public void update() {
         try {
-            var dto = new com.medical_clinical_app.dto.medicine.request.MedicineUpdateRequest();
-            dto.nome       = editNome;
-            dto.controlado = editControlado;
-            dto.posologia  = editPosologia;
+            var dto = MedicineUpdateRequest.builder()
+                    .nome(editNome)
+                    .controlado(editControlado)
+                    .posologia(editPosologia)
+                    .build();
 
-            medicineService.updateByUuid(editUuid, dto);
+            medicineService.update(editUuid, dto);
             addInfo("Medicamento atualizado.");
             refresh();
         } catch (Exception e) {

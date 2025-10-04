@@ -6,20 +6,22 @@ import com.medical_clinical_app.dto.patient.response.PatientResponse;
 import com.medical_clinical_app.model.enumeration.GenderEnum;
 import com.medical_clinical_app.service.PatientService;
 import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
 @Named("patientBean")
-@RequestScoped
-@Data
+@ViewScoped
+@Getter
+@Setter
 public class PatientBean implements Serializable {
 
     @Inject
@@ -78,7 +80,7 @@ public class PatientBean implements Serializable {
 
     public void delete(String uuid) {
         try {
-            patientService.deleteByUuid(uuid);
+            patientService.delete(uuid);
             addInfo("Paciente removido.");
             refresh();
         } catch (Exception e) {
@@ -129,6 +131,10 @@ public class PatientBean implements Serializable {
         } catch (Exception e) {
             addError("Erro ao atualizar: " + messageOf(e));
         }
+    }
+
+    public com.medical_clinical_app.model.enumeration.GenderEnum[] getGenders() {
+        return com.medical_clinical_app.model.enumeration.GenderEnum.values();
     }
 
 }

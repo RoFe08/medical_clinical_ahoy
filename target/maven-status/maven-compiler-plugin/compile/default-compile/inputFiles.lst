@@ -1,4 +1,5 @@
 /Users/rodrigoferraz/ahoy/medical_clinical_ahoy/src/main/java/com/medical_clinical_app/dto/medicine/request/MedicineCreateRequest.java
+/Users/rodrigoferraz/ahoy/medical_clinical_ahoy/src/main/java/com/medical_clinical_app/model/Manufacturer.java
 /Users/rodrigoferraz/ahoy/medical_clinical_ahoy/src/main/java/com/medical_clinical_app/dto/medicine/request/MedicineUpdateRequest.java
 /Users/rodrigoferraz/ahoy/medical_clinical_ahoy/src/main/java/com/medical_clinical_app/dto/patient/response/PatientResponse.java
 /Users/rodrigoferraz/ahoy/medical_clinical_ahoy/src/main/java/com/medical_clinical_app/view/PrescriptionBean.java
